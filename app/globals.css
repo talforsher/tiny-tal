@@ -25,3 +25,37 @@ body {
     text-wrap: balance;
   }
 }
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 2px;
+  }
+  
+  /* Hide focus rings for mouse users */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+@layer components {
+  button {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  button {
+    @apply bg-blue-500 text-white;
+    @apply hover:bg-blue-600 hover:scale-[1.02];
+    @apply focus:ring-blue-500;
+    @apply active:bg-blue-700 active:scale-[0.98];
+  }
+
+  button {
+    @apply bg-green-500 text-white;
+    @apply hover:bg-green-600 hover:scale-[1.02];
+    @apply focus:ring-green-500;
+    @apply active:bg-green-700 active:scale-[0.98];
+  }
+}

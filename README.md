@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Interactive Puzzle Creator and Player
+Goal: Create an interactive web application that allows users to create and play custom image
+puzzles, with AI-enhanced features.
+Features:
+Puzzle Creation (/puzzle/create):
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Upload an image to create a puzzle from
+- Enable users to "break" the image into puzzle pieces by drawing paths
+- Generate AI-powered descriptions and titles based on the uploaded image
+- Save the created puzzle with a unique identifier
+  Puzzle Playing (/puzzle/play/[id]):
+- Load and display puzzle pieces based on saved configurations
+- Allow players to drag and arrange pieces to complete the puzzle
+- Show the AI-generated context about the puzzle
+- Provide feedback on progress and completion
+  Core Requirements:
+- Build using Next.js 14 with App Router
+- Implement drag-and-drop functionality for puzzle pieces
+- Create an intuitive interface for drawing puzzle piece shapes
+- Integrate with OpenAI API for image analysis
+- Store puzzle configurations (method of storage is up to you)
+  Guidelines:
+- Focus on creating an engaging and intuitive user experience
+- Consider accessibility in your design decisions
+- You may use any UI library or components of your choice
+- Think about load states, error handling, and edge cases
+- Consider adding features that would make the experience more engaging
+- Pay attention to animations and transitions
+- Create reusable components and hooks
+- Mind code quality, structure, and performance
+- Keep it as simple as possible while maintaining good UX
+  Bonus Points For:
+- Innovative use of AI features
+- Creative approaches to puzzle creation or gameplay
+- Thoughtful error states and loading experiences
+- Mobile-responsive design
+- Accessibility considerations
+- Performance optimizations

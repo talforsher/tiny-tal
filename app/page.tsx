@@ -1,65 +1,27 @@
-// app/puzzles/page.tsx
+"use client";
 
-import React, { Suspense } from "react";
+import React from "react";
 import MoodImage from "./components/Mood";
 import PuzzleList from "./components/PuzzleList";
 import Link from "next/link";
 import ErrorBoundary from "@/app/puzzles/ErrorBoundary";
-
-interface Puzzle {
-  id: string;
-  image: string;
-  title: string;
-  description: string;
-}
-
-async function fetchDescription(): Promise<string> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/description`,
-    {
-      next: { revalidate: 30 },
-    }
-  );
-  if (!res.ok) {
-    throw new Error("Failed to fetch description");
-  }
-  const data = await res.json();
-  return data.description;
-}
-
-async function fetchPuzzles(): Promise<Puzzle[]> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/puzzles`, {
-    next: { revalidate: 30 },
-  });
-  if (!res.ok) {
-    throw new Error("Failed to fetch puzzles");
-  }
-  const data = await res.json();
-  return data;
-}
+import { Puzzle } from "./types";
+import { usePuzzles } from "@/app/hooks/usePuzzles";
 
 export default function PuzzlesPage() {
   return (
     <ErrorBoundary>
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center min-h-[50vh]">
-            <div className="text-xl">Loading puzzles...</div>
-          </div>
-        }
-      >
-        <PuzzlesContent />
-      </Suspense>
+      <PuzzlesContent />
     </ErrorBoundary>
   );
 }
 
-async function PuzzlesContent() {
-  // Fetch data in parallel
-  const [description, puzzles] = await Promise.all([
-    fetchDescription(),
-    fetchPuzzles(),
-  ]);
+function PuzzlesContent() {
+  const { puzzles, description, isLoading, error, refetch } = usePuzzles();
+
+  if (error) {
+    return <div className="text-center py-12 text-red-500">Error: {error}</div>;
+  }
 
   return (
     <div className="max-w-6xl">

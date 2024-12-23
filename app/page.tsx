@@ -5,7 +5,6 @@ import MoodImage from "./components/Mood";
 import PuzzleList from "./components/PuzzleList";
 import Link from "next/link";
 import ErrorBoundary from "@/app/puzzles/ErrorBoundary";
-import { Puzzle } from "./types";
 import { usePuzzles } from "@/app/hooks/usePuzzles";
 
 export default function PuzzlesPage() {
@@ -17,7 +16,7 @@ export default function PuzzlesPage() {
 }
 
 function PuzzlesContent() {
-  const { puzzles, description, isLoading, error, refetch } = usePuzzles();
+  const { puzzles, description, error } = usePuzzles();
 
   if (error) {
     return <div className="text-center py-12 text-red-500">Error: {error}</div>;
@@ -34,7 +33,11 @@ function PuzzlesContent() {
       <PuzzleList puzzles={puzzles} />
       {description && (
         <div className="mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-          {description}
+          {description.split("**").map((paragraph, index) => (
+            <span key={index}>
+              {index % 2 === 0 ? paragraph : <b>{paragraph}</b>}
+            </span>
+          ))}
         </div>
       )}
       {puzzles.length === 0 && (

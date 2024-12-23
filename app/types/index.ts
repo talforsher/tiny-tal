@@ -6,5 +6,4 @@ export interface Point {
 export interface PuzzlePiece {
   id: number;
   points: Point[];
-  offset: Point;
 }

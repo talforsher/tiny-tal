@@ -1,6 +1,6 @@
 "use client";
 
-import { createRef, useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import type { PuzzlePiece, Point } from "@/app/types";
 import Piece from "./Piece";
@@ -49,7 +49,7 @@ export default function DraggablePiece({
         offsetHandler(piece.id, { x: info.offset.x, y: info.offset.y });
       }}
       role="button"
-      tabIndex={0}
+      tabIndex={piece.id}
       aria-label={`Puzzle piece ${piece.id}`}
       aria-grabbed={isDragging}
       onKeyDown={handleKeyDown}
@@ -57,12 +57,7 @@ export default function DraggablePiece({
         isDragging ? "z-10" : "z-0"
       } piece focus:outline-2 focus:outline-blue-500`}
     >
-      <Piece base64Image={image} pathPoints={piece.points} />
-      <svg
-        className="absolute inset-0 w-full h-full"
-        role="img"
-        aria-label="Puzzle piece drawing area"
-      ></svg>
+      <Piece base64Image={image} piece={piece} />
     </motion.div>
   );
 }

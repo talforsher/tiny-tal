@@ -1,14 +1,12 @@
-import { useState, useContext, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Point } from "../types";
+import { PuzzleState, PieceType } from "../types/enums";
 
 interface PuzzlePiece {
   points: Point[];
   offset: Point;
-  type: "drawn" | "auto";
+  type: PieceType;
 }
-
-// Replace state machine with simple string literal type
-type PuzzleState = "waiting" | "drawing" | "moving";
 
 interface UseProps {
   pieces: PuzzlePiece[];
@@ -20,7 +18,9 @@ const _usePuzzlePiece = ({
   isEdit = false,
 }: UseProps) => {
   const [pieces, setPieces] = useState(originalPieces);
-  const [currentState, setCurrentState] = useState<PuzzleState>("waiting");
+  const [currentState, setCurrentState] = useState<PuzzleState>(
+    PuzzleState.WAITING
+  );
   const [moveOffset, setMoveOffset] = useState({ x: 0, y: 0 });
   const [lastMovePoint, setLastMovePoint] = useState({ x: 0, y: 0 });
 
@@ -67,35 +67,81 @@ export const usePuzzlePiece = ({
     isEdit,
   });
 
+  const isPointInPiece = useCallback(
+    (point: Point) => {
+      return currentPieces.findIndex((p) => {
+        const xs = p.points.map((pt) => pt.x + p.offset.x);
+        const ys = p.points.map((pt) => pt.y + p.offset.y);
+        const minX = Math.min(...xs);
+        const maxX = Math.max(...xs);
+        const minY = Math.min(...ys);
+        const maxY = Math.max(...ys);
+
+        return (
+          point.x >= minX &&
+          point.x <= maxX &&
+          point.y >= minY &&
+          point.y <= maxY
+        );
+      });
+    },
+    [currentPieces]
+  );
+
   const handleMouseDown = useCallback(
     (evt: MouseEvent) => {
-      if (currentState === "waiting") {
-        const point = {
-          x: evt.clientX - imageOffset.x,
-          y: evt.clientY - imageOffset.y,
-        };
+      if (currentState !== PuzzleState.WAITING) return;
 
+      const point = {
+        x: evt.clientX - imageOffset.x,
+        y: evt.clientY - imageOffset.y,
+      };
+
+      const pieceIndex = isPointInPiece(point);
+
+      if (typeof pieceIndex === "number" && pieceIndex >= 0) {
+        setCurrentState(PuzzleState.MOVING);
+        setLastMovePoint(point);
+      } else {
         setPieces((pieces) => [
           ...pieces,
-          { points: [point], offset: { x: 0, y: 0 }, type: "drawn" },
+          {
+            points: [point],
+            offset: { x: 0, y: 0 },
+            type: PieceType.DRAWN,
+          },
         ]);
-        setCurrentState("drawing");
+        setCurrentState(PuzzleState.DRAWING);
       }
     },
-    [currentState, currentPieces, setCurrentState, setLastMovePoint]
+    [
+      currentState,
+      imageOffset,
+      setCurrentState,
+      setLastMovePoint,
+      setPieces,
+      isPointInPiece,
+    ]
   );
 
   const handleMouseMove = useCallback(
     (evt: MouseEvent) => {
-      const initialDistance = 64;
       const point = {
-        x: evt.clientX - initialDistance,
-        y: evt.clientY - initialDistance,
+        x: evt.clientX - imageOffset.x,
+        y: evt.clientY - imageOffset.y,
       };
 
-      if (currentState === "drawing") {
+      if (currentState === PuzzleState.DRAWING) {
         setPieces((pieces) => {
           const currentPiece = pieces[pieces.length - 1];
+          const lastPoint = currentPiece.points[currentPiece.points.length - 1];
+          const distance = Math.sqrt(
+            Math.pow(point.x - lastPoint.x, 2) +
+              Math.pow(point.y - lastPoint.y, 2)
+          );
+
+          if (distance < 5) return pieces;
+
           return [
             ...pieces.slice(0, -1),
             {
@@ -104,7 +150,7 @@ export const usePuzzlePiece = ({
             },
           ];
         });
-      } else if (currentState === "moving") {
+      } else if (currentState === PuzzleState.MOVING) {
         setPieces((pieces) => {
           const currentPiece = pieces[pieces.length - 1];
           const dx = point.x - lastMovePoint.x;
@@ -123,22 +169,29 @@ export const usePuzzlePiece = ({
         setLastMovePoint(point);
       }
     },
-    [currentState, lastMovePoint, setLastMovePoint]
+    [currentState, imageOffset, lastMovePoint, setLastMovePoint, setPieces]
   );
 
   const handleMouseUp = useCallback(() => {
-    if (currentState === "drawing") {
+    if (currentState === PuzzleState.DRAWING) {
       const currentPiece = currentPieces[currentPieces.length - 1];
       if (isValidPiece(currentPiece)) {
         onCreatePiece?.(currentPiece);
       } else {
         setPieces((pieces) => pieces.slice(0, -1));
       }
-    } else if (currentState === "moving") {
+    } else if (currentState === PuzzleState.MOVING) {
       onUpdatePiece?.(currentPieces[currentPieces.length - 1]);
     }
-    setCurrentState("waiting");
-  }, [currentState, currentPieces, onCreatePiece, onUpdatePiece]);
+    setCurrentState(PuzzleState.WAITING);
+  }, [
+    currentState,
+    currentPieces,
+    onCreatePiece,
+    onUpdatePiece,
+    setPieces,
+    setCurrentState,
+  ]);
 
   useEffect(() => {
     document.addEventListener("mousedown", handleMouseDown);
@@ -154,8 +207,8 @@ export const usePuzzlePiece = ({
 
   return {
     pieces: currentPieces,
-    isDrawing: currentState === "drawing",
-    isMoving: currentState === "moving",
+    isDrawing: currentState === PuzzleState.DRAWING,
+    isMoving: currentState === PuzzleState.MOVING,
     hasPending: false,
     removePiece: onRemovePiece,
     completePuzzle: onComplete,

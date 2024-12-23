@@ -1,35 +1,30 @@
 import React from "react";
-import { Point } from "@/app/types";
+import { PuzzlePiece } from "@/app/types";
 
 interface ImageWithClipPathProps {
   base64Image: string;
-  pathPoints: Point[];
+  piece: PuzzlePiece;
 }
 
-const ImageWithClipPath = ({
-  base64Image,
-  pathPoints,
-}: ImageWithClipPathProps) => {
+const ImageWithClipPath = ({ base64Image, piece }: ImageWithClipPathProps) => {
   const pathData =
-    pathPoints
+    piece.points
       .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
       .join(" ") + " Z";
 
-  const width = pathPoints.map((p) => p.x).reduce((a, b) => Math.max(a, b), 0);
-  const height = pathPoints.map((p) => p.y).reduce((a, b) => Math.max(a, b), 0);
-
   return (
-    <svg width={800} height={600} viewBox={`0 0 ${width} ${height}`}>
+    <svg width={600} height={600} preserveAspectRatio="xMidYMid meet">
       <defs>
-        <clipPath id="customClipPath">
+        <clipPath id={`clip-path-${piece.id}`}>
           <path d={pathData} />
         </clipPath>
       </defs>
       <image
         href={`data:image/jpeg;base64,${base64Image}`}
-        width={800}
+        width={600}
         height={600}
-        clipPath={`url(#customClipPath)`}
+        clipPath={`url(#clip-path-${piece.id})`}
+        preserveAspectRatio="xMidYMid slice"
       />
     </svg>
   );

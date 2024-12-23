@@ -6,20 +6,16 @@ import Image from "next/image";
 export function PuzzleCreator({
   image,
   setPieces,
+  imageOffset,
+  setImageOffset,
 }: {
   image: string;
   setPieces: (pieces: PuzzlePiece[]) => void;
+  imageOffset: Point;
+  setImageOffset: (offset: Point) => void;
 }) {
-  const [imageOffset, setImageOffset] = useState<Point>({ x: 0, y: 0 });
   const imageRef = useRef<HTMLImageElement>(null);
-  const {
-    pieces,
-    isDrawing,
-    isMoving,
-    hasPending,
-    removePiece,
-    completePuzzle,
-  } = usePuzzlePiece({
+  const { pieces, isDrawing } = usePuzzlePiece({
     imageOffset,
     pieces: [],
     isEdit: true,
@@ -37,7 +33,7 @@ export function PuzzleCreator({
         ref={imageRef}
         src={image}
         alt="Puzzle image"
-        width={800}
+        width={600}
         height={600}
         className="w-full h-auto"
         onLoad={() => {

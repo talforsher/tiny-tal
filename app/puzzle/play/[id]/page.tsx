@@ -91,7 +91,7 @@ export default function PuzzlePlay({ params }: PuzzlePlayProps) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl">
       <div className="mb-4">
         <h1 className="text-2xl font-bold">Puzzle Play</h1>
         {completed && (
@@ -102,11 +102,13 @@ export default function PuzzlePlay({ params }: PuzzlePlayProps) {
       </div>
 
       <div
-        className="relative w-full aspect-[4/3] border border-gray-300 rounded-lg bg-gray-50"
+        className="relative border border-gray-300 rounded-lg bg-gray-50"
         style={{
           backgroundImage: `url(data:image/jpeg;base64,${image})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundSize: "600px 600px",
+          backgroundRepeat: "no-repeat",
+          width: "600px",
+          height: "600px",
         }}
       >
         {metadata && (
@@ -116,17 +118,19 @@ export default function PuzzlePlay({ params }: PuzzlePlayProps) {
           </div>
         )}
         {image &&
-          pieces.map((piece, index) => (
+          pieces.map((piece) => (
+            <div key={piece.id} className="absolute pointer-events-none">
+              <Piece key={piece.id} piece={piece} base64Image="" />
+            </div>
+          ))}
+        {image &&
+          pieces.map((piece) => (
             <DraggablePiece
-              key={index}
+              key={piece.id}
               piece={piece}
               image={image}
               offsetHandler={offsetHandler}
             />
-          ))}
-        {image &&
-          pieces.map((pieces, index) => (
-            <Piece key={index} base64Image="" pathPoints={pieces.points} />
           ))}
       </div>
     </div>

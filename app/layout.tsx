@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Link from "next/link";
+import Navbar from "./components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,13 +24,8 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <main id="main-content" className="min-h-screen p-4 md:p-8">
-          {/* nav */}
-          <nav className="flex gap-4">
-            <Link href="/">Home</Link>
-            <Link href="/puzzles">Puzzles</Link>
-            <Link href="/puzzle/create">Create</Link>
-          </nav>
+        <main id="main-content" className="p-4 md:p-8">
+          <Navbar />
           {children}
         </main>
       </body>

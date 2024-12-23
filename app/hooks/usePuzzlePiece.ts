@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Point } from "../types";
 import { PuzzleState, PieceType } from "../types/enums";
 
-interface PuzzlePiece {
+export interface PuzzlePiece {
   points: Point[];
   offset: Point;
   type: PieceType;

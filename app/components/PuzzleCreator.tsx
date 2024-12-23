@@ -20,15 +20,17 @@ export function PuzzleCreator({
     pieces: [],
     isEdit: true,
     onCreatePiece: (piece) => {
+      // @ts-ignore
       setPieces((prevPieces) => [...prevPieces, piece]);
     },
     onRemovePiece: (index) => {
+      // @ts-ignore
       setPieces((prevPieces) => prevPieces.filter((_, i) => i !== index));
     },
   });
 
   return (
-    <div className="relative">
+    <div className="relative" style={{ width: "600px", height: "600px" }}>
       <Image
         ref={imageRef}
         src={image}

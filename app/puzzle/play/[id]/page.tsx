@@ -52,7 +52,9 @@ export default function PuzzlePlay({ params }: PuzzlePlayProps) {
         p.id === pieceId
           ? {
               ...p,
-              offset: { x: p.offset.x + offset.x, y: p.offset.y + offset.y },
+              offset: p.offset
+                ? { x: p.offset.x + offset.x, y: p.offset.y + offset.y }
+                : undefined,
             }
           : p
       )
@@ -62,11 +64,14 @@ export default function PuzzlePlay({ params }: PuzzlePlayProps) {
   const checkPuzzleCompletion = () => {
     const offset = 100;
     const range = 20;
-    const isCompleted = pieces.every(
-      (piece) =>
+    if (pieces.length === 0) return;
+    const isCompleted = pieces.every((piece) => {
+      if (!piece.offset) return false;
+      return (
         Math.abs(piece.offset.x - offset) < range &&
         Math.abs(piece.offset.y - offset) < range
-    );
+      );
+    });
     setCompleted(isCompleted);
   };
 
@@ -104,11 +109,11 @@ export default function PuzzlePlay({ params }: PuzzlePlayProps) {
       <div
         className="relative border border-gray-300 rounded-lg bg-gray-50"
         style={{
-          backgroundImage: `url(data:image/jpeg;base64,${image})`,
-          backgroundSize: "600px 600px",
-          backgroundRepeat: "no-repeat",
           width: "600px",
           height: "600px",
+          backgroundImage: `url(data:image/jpeg;base64,${image})`,
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
         }}
       >
         {metadata && (

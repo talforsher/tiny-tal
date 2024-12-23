@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { PuzzleCreator } from "@/app/components/PuzzleCreator";
 import { Point, PuzzlePiece } from "@/app/types";
+import MoodImage from "@/app/components/Mood";
 
 export default function CreatePuzzle() {
   const [image, setImage] = useState<string | null>(null);
@@ -41,6 +42,7 @@ export default function CreatePuzzle() {
       }));
       formData.append("pieces", JSON.stringify(formattedPieces));
       setIsLoading(true);
+      setError(null);
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
@@ -56,6 +58,7 @@ export default function CreatePuzzle() {
 
   const handleGenerateAI = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const response = await fetch("/api/generate-ai", {
         method: "POST",
@@ -86,6 +89,11 @@ export default function CreatePuzzle() {
               className="cursor-pointer block p-4 hover:bg-gray-50"
             >
               <div>
+                {isLoading ? (
+                  <MoodImage mood="cry" />
+                ) : (
+                  <MoodImage mood="curiosity" />
+                )}
                 <p>Click to upload an image</p>
                 <p className="text-sm text-gray-500">
                   PNG, JPG, GIF up to 10MB
@@ -111,11 +119,7 @@ export default function CreatePuzzle() {
               onClick={handleGenerateAI}
               disabled={isLoading}
             >
-              {isLoading
-                ? "Generating..."
-                : image
-                ? "Try Again"
-                : "Generate AI Image"}
+              {isLoading ? "Generating..." : "Generate AI Image"}
             </button>
           </div>
         )}
@@ -137,7 +141,12 @@ export default function CreatePuzzle() {
             </Link>
           )}
         </div>
-        {error && <p className="text-red-500">{error}</p>}
+        {error && (
+          <p className="text-red-500">
+            {error}
+            <MoodImage mood="cry" />
+          </p>
+        )}
       </div>
     </div>
   );

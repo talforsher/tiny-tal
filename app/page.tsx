@@ -1,8 +1,10 @@
-"use client";
+// app/puzzles/page.tsx
 
-import { useEffect, useState } from "react";
+import React, { Suspense } from "react";
+import MoodImage from "./components/Mood";
+import PuzzleList from "./components/PuzzleList";
 import Link from "next/link";
-import Image from "next/image";
+import ErrorBoundary from "@/app/puzzles/ErrorBoundary";
 
 interface Puzzle {
   id: string;
@@ -11,73 +13,68 @@ interface Puzzle {
   description: string;
 }
 
+async function fetchDescription(): Promise<string> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/description`,
+    {
+      next: { revalidate: 30 },
+    }
+  );
+  if (!res.ok) {
+    throw new Error("Failed to fetch description");
+  }
+  const data = await res.json();
+  return data.description;
+}
+
+async function fetchPuzzles(): Promise<Puzzle[]> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/puzzles`, {
+    next: { revalidate: 30 },
+  });
+  if (!res.ok) {
+    throw new Error("Failed to fetch puzzles");
+  }
+  const data = await res.json();
+  return data;
+}
+
 export default function PuzzlesPage() {
-  const [puzzles, setPuzzles] = useState<Puzzle[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  return (
+    <ErrorBoundary>
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <div className="text-xl">Loading puzzles...</div>
+          </div>
+        }
+      >
+        <PuzzlesContent />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
 
-  useEffect(() => {
-    const fetchPuzzles = async () => {
-      try {
-        const response = await fetch("/api/puzzles");
-        if (!response.ok) throw new Error("Failed to fetch puzzles");
-        const data = await response.json();
-        setPuzzles(data);
-      } catch (err) {
-        setError("Failed to load puzzles. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPuzzles();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="text-xl">Loading puzzles...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="text-red-500">{error}</div>
-      </div>
-    );
-  }
+async function PuzzlesContent() {
+  // Fetch data in parallel
+  const [description, puzzles] = await Promise.all([
+    fetchDescription(),
+    fetchPuzzles(),
+  ]);
 
   return (
     <div className="max-w-6xl">
+      {puzzles.length > 0 ? (
+        <MoodImage mood="happiness" />
+      ) : (
+        <MoodImage mood="confused" />
+      )}
       <h1 className="text-3xl font-bold mb-8">Available Puzzles</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {puzzles.map((puzzle) => (
-          <Link
-            key={puzzle.id}
-            href={`/puzzle/play/${puzzle.id}`}
-            className="group block bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <div className="aspect-video relative">
-              <Image
-                src={`data:image/jpeg;base64,${puzzle.image}`}
-                alt={puzzle.title}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-200"
-              />
-            </div>
-            <div className="p-4">
-              <h2 className="text-xl font-semibold mb-2">{puzzle.title}</h2>
-              <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2">
-                {puzzle.description}
-              </p>
-            </div>
-          </Link>
-        ))}
-      </div>
-
+      <PuzzleList puzzles={puzzles} />
+      {description && (
+        <div className="mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+          {description}
+        </div>
+      )}
       {puzzles.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-600 dark:text-gray-300 mb-4">

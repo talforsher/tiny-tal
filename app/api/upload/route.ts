@@ -45,7 +45,6 @@ export async function POST(request: Request) {
         },
       ],
     });
-    console.log(response.choices[0].message.content);
 
     try {
       await mkdir(folderPath, { recursive: true });

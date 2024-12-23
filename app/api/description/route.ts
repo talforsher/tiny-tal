@@ -8,6 +8,7 @@ const openai = new OpenAI({
 });
 
 export async function GET() {
+  console.log("Fetching description");
   try {
     const mediaDir = process.env.MEDIA_DIR || "public/uploads";
     const folders = await readdir(mediaDir);

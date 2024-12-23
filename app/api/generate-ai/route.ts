@@ -6,6 +6,7 @@ const openai = new OpenAI({
 });
 
 export async function POST() {
+  console.log("Generating AI image");
   try {
     const response = await openai.images.generate({
       prompt:

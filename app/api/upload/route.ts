@@ -6,6 +6,7 @@ import OpenAI from "openai";
 const openai = new OpenAI();
 
 export async function POST(request: Request) {
+  console.log("Uploading puzzle");
   try {
     if (!request.body) {
       return NextResponse.json(

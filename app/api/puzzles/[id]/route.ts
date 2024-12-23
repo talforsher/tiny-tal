@@ -7,6 +7,7 @@ export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  console.log("Fetching puzzle", params.id);
   try {
     const mediaDir = process.env.MEDIA_DIR || "public/uploads";
     const folder = join(mediaDir, `${params.id}`);

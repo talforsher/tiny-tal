@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { readdir, readFile } from "fs/promises";
 import { join } from "path";
 
+export const revalidate = 30;
+
 export async function GET() {
   console.log("Fetching puzzles");
   try {

@@ -7,6 +7,8 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY ?? "",
 });
 
+export const revalidate = 30;
+
 export async function GET() {
   console.log("Fetching description");
   try {

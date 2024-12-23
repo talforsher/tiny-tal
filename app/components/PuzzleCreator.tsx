@@ -1,31 +1,33 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { usePuzzlePiece } from "../hooks/usePuzzlePiece";
 import { Point, PuzzlePiece } from "../types";
 import Image from "next/image";
+import { PuzzleProvider } from "../contexts/PuzzleContext";
 
-export function PuzzleCreator({
+export function PuzzleCreatorContent({
   image,
   setPieces,
   imageOffset,
   setImageOffset,
 }: {
   image: string;
-  setPieces: (pieces: PuzzlePiece[]) => void;
+  setPieces: (
+    pieces: PuzzlePiece[] | ((prev: PuzzlePiece[]) => PuzzlePiece[])
+  ) => void;
   imageOffset: Point;
   setImageOffset: (offset: Point) => void;
 }) {
   const imageRef = useRef<HTMLImageElement>(null);
   const { pieces, isDrawing } = usePuzzlePiece({
     imageOffset,
-    pieces: [],
-    isEdit: true,
     onCreatePiece: (piece) => {
-      // @ts-ignore
-      setPieces((prevPieces) => [...prevPieces, piece]);
+      setPieces((prevPieces: PuzzlePiece[]) => [...prevPieces, piece]);
     },
-    onRemovePiece: (index) => {
-      // @ts-ignore
-      setPieces((prevPieces) => prevPieces.filter((_, i) => i !== index));
+    onUpdatePiece: (piece) => {
+      setPieces((prevPieces: PuzzlePiece[]) => {
+        const index = prevPieces.length - 1;
+        return [...prevPieces.slice(0, index), piece];
+      });
     },
   });
 
@@ -48,18 +50,38 @@ export function PuzzleCreator({
         }}
       />
       <svg className="absolute inset-0 w-full h-full">
-        {pieces.map((piece, index) => (
-          <path
-            key={index}
-            d={generatePathFromPoints(piece.points)}
-            transform={`translate(${piece.offset.x},${piece.offset.y})`}
-            className={`${
-              isDrawing ? "stroke-blue-500" : "stroke-black"
-            } fill-transparent stroke-2`}
-          />
-        ))}
+        {pieces.map((piece, index) => {
+          if (!piece.offset) {
+            return null;
+          }
+          return (
+            <path
+              key={index}
+              d={generatePathFromPoints(piece.points)}
+              transform={`translate(${piece.offset.x},${piece.offset.y})`}
+              className={`${
+                isDrawing ? "stroke-blue-500" : "stroke-black"
+              } fill-transparent stroke-2`}
+            />
+          );
+        })}
       </svg>
     </div>
+  );
+}
+
+export function PuzzleCreator(props: {
+  image: string;
+  setPieces: (
+    pieces: PuzzlePiece[] | ((prev: PuzzlePiece[]) => PuzzlePiece[])
+  ) => void;
+  imageOffset: Point;
+  setImageOffset: (offset: Point) => void;
+}) {
+  return (
+    <PuzzleProvider>
+      <PuzzleCreatorContent {...props} />
+    </PuzzleProvider>
   );
 }
 

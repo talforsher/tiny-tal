@@ -8,3 +8,10 @@ export interface PuzzlePiece {
   points: Point[];
   offset?: Point;
 }
+
+export interface Puzzle {
+  id: string;
+  image: string;
+  title: string;
+  description: string;
+}

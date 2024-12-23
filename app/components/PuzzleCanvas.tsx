@@ -19,8 +19,6 @@ export default function PuzzleCanvas({
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    // Canvas setup and drawing logic will go here
   }, [imageUrl]);
 
   return (

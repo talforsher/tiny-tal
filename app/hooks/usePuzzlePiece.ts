@@ -1,6 +1,4 @@
 import { useState, useContext, useEffect, useCallback } from "react";
-import { useMachine } from "@xstate/react";
-import { createMachine } from "xstate";
 import { Point } from "../types";
 
 interface PuzzlePiece {
@@ -9,37 +7,8 @@ interface PuzzlePiece {
   type: "drawn" | "auto";
 }
 
-// State machine for puzzle piece creation
-const puzzlePieceMachine = createMachine({
-  id: "puzzlePiece",
-  initial: "waiting",
-  context: {
-    firstTime: true,
-    hasPending: false,
-    autoShape: null,
-    hasDrawn: false,
-  },
-  states: {
-    waiting: {
-      on: {
-        DRAW: "drawing",
-        MOVE: "moving",
-      },
-    },
-    drawing: {
-      on: {
-        FINISH: "waiting",
-        CANCEL: "waiting",
-      },
-    },
-    moving: {
-      on: {
-        FINISH: "waiting",
-        CANCEL: "waiting",
-      },
-    },
-  },
-});
+// Replace state machine with simple string literal type
+type PuzzleState = "waiting" | "drawing" | "moving";
 
 interface UseProps {
   pieces: PuzzlePiece[];
@@ -51,15 +20,15 @@ const _usePuzzlePiece = ({
   isEdit = false,
 }: UseProps) => {
   const [pieces, setPieces] = useState(originalPieces);
-  const [state, send] = useMachine(puzzlePieceMachine);
+  const [currentState, setCurrentState] = useState<PuzzleState>("waiting");
   const [moveOffset, setMoveOffset] = useState({ x: 0, y: 0 });
   const [lastMovePoint, setLastMovePoint] = useState({ x: 0, y: 0 });
 
   return {
     pieces,
     setPieces,
-    state,
-    send,
+    currentState,
+    setCurrentState,
     moveOffset,
     setMoveOffset,
     lastMovePoint,
@@ -89,17 +58,18 @@ export const usePuzzlePiece = ({
   const {
     pieces: currentPieces,
     setPieces,
-    state,
-    send,
+    currentState,
+    setCurrentState,
     lastMovePoint,
     setLastMovePoint,
   } = _usePuzzlePiece({
     pieces,
     isEdit,
   });
+
   const handleMouseDown = useCallback(
     (evt: MouseEvent) => {
-      if (state.matches("waiting")) {
+      if (currentState === "waiting") {
         const point = {
           x: evt.clientX - imageOffset.x,
           y: evt.clientY - imageOffset.y,
@@ -109,10 +79,10 @@ export const usePuzzlePiece = ({
           ...pieces,
           { points: [point], offset: { x: 0, y: 0 }, type: "drawn" },
         ]);
-        send({ type: "DRAW" });
+        setCurrentState("drawing");
       }
     },
-    [state, currentPieces, send, setLastMovePoint]
+    [currentState, currentPieces, setCurrentState, setLastMovePoint]
   );
 
   const handleMouseMove = useCallback(
@@ -123,7 +93,7 @@ export const usePuzzlePiece = ({
         y: evt.clientY - initialDistance,
       };
 
-      if (state.matches("drawing")) {
+      if (currentState === "drawing") {
         setPieces((pieces) => {
           const currentPiece = pieces[pieces.length - 1];
           return [
@@ -134,7 +104,7 @@ export const usePuzzlePiece = ({
             },
           ];
         });
-      } else if (state.matches("moving")) {
+      } else if (currentState === "moving") {
         setPieces((pieces) => {
           const currentPiece = pieces[pieces.length - 1];
           const dx = point.x - lastMovePoint.x;
@@ -153,22 +123,22 @@ export const usePuzzlePiece = ({
         setLastMovePoint(point);
       }
     },
-    [state, lastMovePoint, setLastMovePoint]
+    [currentState, lastMovePoint, setLastMovePoint]
   );
 
   const handleMouseUp = useCallback(() => {
-    if (state.matches("drawing")) {
+    if (currentState === "drawing") {
       const currentPiece = currentPieces[currentPieces.length - 1];
       if (isValidPiece(currentPiece)) {
         onCreatePiece?.(currentPiece);
       } else {
         setPieces((pieces) => pieces.slice(0, -1));
       }
-    } else if (state.matches("moving")) {
+    } else if (currentState === "moving") {
       onUpdatePiece?.(currentPieces[currentPieces.length - 1]);
     }
-    send({ type: "FINISH" });
-  }, [state, currentPieces, onCreatePiece, onUpdatePiece, send]);
+    setCurrentState("waiting");
+  }, [currentState, currentPieces, onCreatePiece, onUpdatePiece]);
 
   useEffect(() => {
     document.addEventListener("mousedown", handleMouseDown);
@@ -184,9 +154,9 @@ export const usePuzzlePiece = ({
 
   return {
     pieces: currentPieces,
-    isDrawing: state.matches("drawing"),
-    isMoving: state.matches("moving"),
-    hasPending: state.context.hasPending,
+    isDrawing: currentState === "drawing",
+    isMoving: currentState === "moving",
+    hasPending: false,
     removePiece: onRemovePiece,
     completePuzzle: onComplete,
   };

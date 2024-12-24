@@ -78,6 +78,7 @@ export default function CreatePuzzle() {
         {!image ? (
           <>
             <input
+              disabled={isLoading}
               type="file"
               accept="image/*"
               onChange={handleImageSelect}
@@ -112,7 +113,7 @@ export default function CreatePuzzle() {
             setImageOffset={setImageOffset}
           />
         )}
-        {!pieces.length && (
+        {!pieces.length && !image && (
           <div className="flex flex-col gap-2">
             <button
               className="bg-blue-500 text-white rounded-md p-2"
